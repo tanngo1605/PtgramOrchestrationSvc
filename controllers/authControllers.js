@@ -12,7 +12,6 @@ exports.isLoggedIn = (req, res, next) => {
         return next()
       }
       req.username = decodedValue.username;
-      console.log("Authorization success")
       next()
   
     } )

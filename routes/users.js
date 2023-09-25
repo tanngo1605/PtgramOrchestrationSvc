@@ -31,7 +31,6 @@ router.post('/login', function(req, res, next) {
     expiresIn: "23h"
   })
 
-  console.log({token})
   return res.status(200).json({
     msg: "user login",
     username,
