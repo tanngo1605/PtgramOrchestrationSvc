@@ -1,43 +1,40 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-const mockUsers = require("../mockdata/mockUsers")
-const jwt = require("jsonwebtoken")
+const mockUsers = require("../mockdata/mockUsers");
+const jwt = require("jsonwebtoken");
 const MY_JWT_SECRET = "MY_JWT_SECRET";
+const { getUserToken } = require("../supportedRPC");
+const { default: axios } = require("axios");
+const { APPL_SVC_URL } = process.env;
 
-/* GET users listing. */
-router.post('/signup', function(req, res, next) {
-  const {username, userpassword, email} = req.body;
-  const token = jwt.sign({username}, MY_JWT_SECRET, {
-    expiresIn: "23h"
-  })
-  mockUsers[username] = userpassword;
+router.post("/signup", function (req, res, next) {
   res.status(200).json({
     msg: "user created",
     username,
-    email,
-    token
-  })
+  });
 });
 
-router.post('/login', function(req, res, next) {
-  const {username, userpassword} = req.body;
-  if(!mockUsers[username] || userpassword !== mockUsers[username]){
-    console.log("Wrong")
-    return res.status(400).json({
-      msg: "Wrong username or password"
-    })
+router.post("/login", async function (req, res, next) {
+  const { username, password } = req.body;
+  try {
+    const rpcRes = await axios.post(`${APPL_SVC_URL}/${getUserToken}`, {
+      username,
+      password,
+    });
+
+    const { result } = rpcRes.data;
+
+    return res.status(200).json({
+      msg: "user login",
+      username,
+      token: result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      err,
+    });
   }
-  const token = jwt.sign({username}, MY_JWT_SECRET, {
-    expiresIn: "23h"
-  })
-
-  return res.status(200).json({
-    msg: "user login",
-    username,
-    token
-  })
 });
-
-
 
 module.exports = router;
